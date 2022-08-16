@@ -1,7 +1,5 @@
 package com.apps.keka.api.users.ui.model;
 
-import java.util.List;
-
 public class UserResponseModel {
 
     private String userId;

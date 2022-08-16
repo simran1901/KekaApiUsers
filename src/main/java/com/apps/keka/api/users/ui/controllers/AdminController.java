@@ -1,8 +1,6 @@
 package com.apps.keka.api.users.ui.controllers;
 
-import com.apps.keka.api.users.service.AttendanceService;
 import com.apps.keka.api.users.service.UsersService;
-import com.apps.keka.api.users.shared.AttendanceDto;
 import com.apps.keka.api.users.shared.UserDto;
 import com.apps.keka.api.users.ui.model.*;
 import org.modelmapper.ModelMapper;
@@ -20,8 +18,6 @@ public class AdminController {
 
     @Autowired
     UsersService usersService;
-    @Autowired
-    AttendanceService attendanceService;
     @Autowired
     private Environment env;
 
@@ -54,7 +50,7 @@ public class AdminController {
                                                      @PathVariable("userId") String userId) {
 
         if (!usersService.isAdmin(authHeader)) {
-            return new ResponseEntity(HttpStatus.UNAUTHORIZED);
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
         }
 
         UserDto userDto = usersService.getUserByUserId(userId);
@@ -71,7 +67,7 @@ public class AdminController {
     public ResponseEntity<HttpStatus> deleteUser(@RequestHeader(value = "Authorization") String authHeader,
                                                  @PathVariable("userId") String userId) {
         if (!usersService.isAdmin(authHeader)) {
-            return new ResponseEntity(HttpStatus.UNAUTHORIZED);
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
         }
         return usersService.deleteUserByUserId(userId);
 
@@ -84,35 +80,13 @@ public class AdminController {
                                                  @PathVariable("userId") String userId,
                                                  @RequestBody UpdateUserRequestModel userDetails) {
         if (!usersService.isAdmin(authHeader)) {
-            return new ResponseEntity(HttpStatus.UNAUTHORIZED);
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
         }
         ModelMapper modelMapper = new ModelMapper();
         modelMapper.getConfiguration().setMatchingStrategy(MatchingStrategies.STRICT);
 
         UserDto userDto = modelMapper.map(userDetails, UserDto.class);
         return usersService.updateUserByUserId(userId, userDto);
-    }
-
-    // mark attendance
-    @PatchMapping(value = "/attendance/{userId}",
-            consumes = {MediaType.APPLICATION_XML_VALUE, MediaType.APPLICATION_JSON_VALUE},
-            produces = {MediaType.APPLICATION_XML_VALUE, MediaType.APPLICATION_JSON_VALUE})
-    public ResponseEntity<AttendanceDto> markAttendance(@RequestHeader("Authorization") String authHeader,
-                                                        @PathVariable("userId") String userId,
-                                                        @RequestBody MarkAttendanceRequestModel details) {
-        if (!usersService.isAdmin(authHeader)) {
-            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
-        }
-
-        ModelMapper modelMapper = new ModelMapper();
-        modelMapper.getConfiguration().setMatchingStrategy(MatchingStrategies.STRICT);
-
-        AttendanceDto attendanceDto = modelMapper.map(details, AttendanceDto.class);
-        attendanceDto.setUserId(userId);
-
-        attendanceDto = attendanceService.markAttendance(attendanceDto);
-
-        return ResponseEntity.status(HttpStatus.OK).body(attendanceDto);
     }
 
     @GetMapping(value = "/check",

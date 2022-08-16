@@ -1,6 +1,5 @@
 package com.apps.keka.api.users.ui.controllers;
 
-import com.apps.keka.api.users.service.AttendanceService;
 import com.apps.keka.api.users.service.UsersService;
 import com.apps.keka.api.users.shared.UserDto;
 import com.apps.keka.api.users.ui.model.*;
@@ -20,8 +19,6 @@ public class UsersController {
     @Autowired
     UsersService usersService;
     @Autowired
-    AttendanceService attendanceService;
-    @Autowired
     private Environment env;
 
     @GetMapping("/status/check")
@@ -39,7 +36,7 @@ public class UsersController {
             @RequestBody CreateUserRequestModel userDetails) {
         // does authHeader belong to admin?
         if (!usersService.isAdmin(authHeader)) {
-            return new ResponseEntity(HttpStatus.UNAUTHORIZED);
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
         }
 
         ModelMapper modelMapper = new ModelMapper();
@@ -65,55 +62,6 @@ public class UsersController {
 
         UserDto userDto = usersService.getUserByUserId(userId);
         UserResponseModel returnValue = new ModelMapper().map(userDto, UserResponseModel.class);
-
-        return ResponseEntity.status(HttpStatus.OK).body(returnValue);
-    }
-
-    // check in
-    @PostMapping(value = "/attendance",
-            consumes = {MediaType.APPLICATION_XML_VALUE, MediaType.APPLICATION_JSON_VALUE},
-            produces = {MediaType.APPLICATION_XML_VALUE, MediaType.APPLICATION_JSON_VALUE})
-    public ResponseEntity<HttpStatus> checkIn(@RequestHeader(value = "Authorization") String authHeader) {
-        if (!usersService.isUser(authHeader)) {
-            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
-        }
-        String userId = usersService.getUserIdFromToken(authHeader);
-
-        attendanceService.checkIn(userId);
-
-        return new ResponseEntity<>(HttpStatus.OK);
-    }
-
-    // check out
-    @PatchMapping(value = "/attendance",
-            consumes = {MediaType.APPLICATION_XML_VALUE, MediaType.APPLICATION_JSON_VALUE},
-            produces = {MediaType.APPLICATION_XML_VALUE, MediaType.APPLICATION_JSON_VALUE})
-    public ResponseEntity checkOut(@RequestHeader(value = "Authorization") String authHeader) {
-        if (!usersService.isUser(authHeader)) {
-            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
-        }
-        String userId = usersService.getUserIdFromToken(authHeader);
-
-        attendanceService.checkOut(userId);
-
-        return new ResponseEntity<>(HttpStatus.OK);
-    }
-
-    // get attendance
-    @GetMapping(value = "/attendance",
-            consumes = {MediaType.APPLICATION_XML_VALUE, MediaType.APPLICATION_JSON_VALUE},
-            produces = {MediaType.APPLICATION_XML_VALUE, MediaType.APPLICATION_JSON_VALUE})
-    public ResponseEntity<AttendanceListResponseModel> getAttendance(@RequestHeader(value = "Authorization") String authHeader,
-                                                                     @RequestBody GetAttendanceRequestModel details) {
-        if (!usersService.isUser(authHeader)) {
-            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
-        }
-        ModelMapper modelMapper = new ModelMapper();
-        modelMapper.getConfiguration().setMatchingStrategy(MatchingStrategies.STRICT);
-
-        String userId = usersService.getUserIdFromToken(authHeader);
-        AttendanceListResponseModel returnValue = modelMapper.map(details, AttendanceListResponseModel.class);
-        returnValue.setAttendanceList(attendanceService.getAttendance(userId, details));
 
         return ResponseEntity.status(HttpStatus.OK).body(returnValue);
     }

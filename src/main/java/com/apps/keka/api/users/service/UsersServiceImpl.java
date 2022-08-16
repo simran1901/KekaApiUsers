@@ -3,8 +3,6 @@ package com.apps.keka.api.users.service;
 import java.util.ArrayList;
 import java.util.UUID;
 
-import com.apps.keka.api.users.ui.model.UpdateUserRequestModel;
-import com.apps.keka.api.users.ui.model.UserResponseModel;
 import com.apps.keka.api.users.ui.model.UserRole;
 import io.jsonwebtoken.Jwts;
 import org.modelmapper.ModelMapper;
@@ -61,9 +59,8 @@ public class UsersServiceImpl implements UsersService {
 
         usersRepository.save(userEntity);
 
-        UserDto returnValue = modelMapper.map(userEntity, UserDto.class);
+        return modelMapper.map(userEntity, UserDto.class);
 
-        return returnValue;
     }
 
     @Override
@@ -91,16 +88,15 @@ public class UsersServiceImpl implements UsersService {
         UserEntity userEntity = usersRepository.findByUserId(userId);
         if (userEntity == null) throw new UsernameNotFoundException("User not found");
 
-        UserDto userDto = new ModelMapper().map(userEntity, UserDto.class);
+        return new ModelMapper().map(userEntity, UserDto.class);
 
-        return userDto;
     }
 
     @Override
     public ResponseEntity<HttpStatus> deleteUserByUserId(String userId) {
         UserEntity userEntity = usersRepository.findByUserId(userId);
         if (userEntity == null) throw new UsernameNotFoundException("User not found");
-        if (userEntity.getRole().equals(UserRole.ADMIN.toString())) return new ResponseEntity(HttpStatus.UNAUTHORIZED);
+        if (userEntity.getRole().equals(UserRole.ADMIN.toString())) return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
         usersRepository.deleteByUserId(userId);
         return ResponseEntity.noContent().build();
     }
@@ -109,7 +105,7 @@ public class UsersServiceImpl implements UsersService {
     public ResponseEntity<HttpStatus> updateUserByUserId(String userId, UserDto userDetails) {
         UserEntity userEntity = usersRepository.findByUserId(userId);
         if (userEntity == null) throw new UsernameNotFoundException("User not found");
-        if (userEntity.getRole().equals(UserRole.ADMIN.toString())) return new ResponseEntity(HttpStatus.UNAUTHORIZED);
+        if (userEntity.getRole().equals(UserRole.ADMIN.toString())) return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
 
         if (userDetails.getFirstName() != null) {
             userEntity.setFirstName(userDetails.getFirstName());
@@ -124,7 +120,7 @@ public class UsersServiceImpl implements UsersService {
             userEntity.setEncryptedPassword(bCryptPasswordEncoder.encode(userDetails.getPassword()));
         }
         usersRepository.save(userEntity);
-        return new ResponseEntity(HttpStatus.NO_CONTENT);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
     @Override

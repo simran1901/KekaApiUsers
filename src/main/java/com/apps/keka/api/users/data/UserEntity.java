@@ -1,5 +1,6 @@
 package com.apps.keka.api.users.data;
 
+import java.io.Serial;
 import java.io.Serializable;
 
 import javax.persistence.Column;
@@ -13,6 +14,7 @@ import javax.persistence.Table;
 public class UserEntity implements Serializable {
 
 
+    @Serial
     private static final long serialVersionUID = -2731425678149216053L;
 
     @Id
