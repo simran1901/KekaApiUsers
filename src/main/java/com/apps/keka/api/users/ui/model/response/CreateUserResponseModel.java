@@ -1,4 +1,4 @@
-package com.apps.keka.api.users.ui.model;
+package com.apps.keka.api.users.ui.model.response;
 
 public class CreateUserResponseModel {
     private String firstName;

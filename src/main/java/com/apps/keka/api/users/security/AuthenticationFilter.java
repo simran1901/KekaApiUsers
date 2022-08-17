@@ -11,7 +11,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import com.apps.keka.api.users.service.UsersService;
 import com.apps.keka.api.users.shared.UserDto;
-import com.apps.keka.api.users.ui.model.LoginRequestModel;
+import com.apps.keka.api.users.ui.model.request.LoginRequestModel;
 
 import org.springframework.core.env.Environment;
 import org.springframework.security.authentication.AuthenticationManager;

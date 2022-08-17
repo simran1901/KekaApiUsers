@@ -1,6 +1,5 @@
 package com.apps.keka.api.users.service;
 
-import com.apps.keka.api.users.ui.model.UpdateUserRequestModel;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.userdetails.UserDetailsService;
