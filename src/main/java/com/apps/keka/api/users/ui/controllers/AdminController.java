@@ -16,6 +16,9 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 @RestController
 @RequestMapping("/admins")
 public class AdminController {
@@ -36,17 +39,22 @@ public class AdminController {
     )
     public ResponseEntity<CreateUserResponseModel> createAdmin(@RequestBody CreateUserRequestModel userDetails) {
 
-        ModelMapper modelMapper = new ModelMapper();
-        modelMapper.getConfiguration().setMatchingStrategy(MatchingStrategies.STRICT);
+        try {
+            usersService.getUserDetailsByEmail(userDetails.getEmail());
+        } catch (Exception ex) {
+            ModelMapper modelMapper = new ModelMapper();
+            modelMapper.getConfiguration().setMatchingStrategy(MatchingStrategies.STRICT);
 
-        UserDto userDto = modelMapper.map(userDetails, UserDto.class);
-        userDto.setRole(UserRole.ADMIN.toString());
+            UserDto userDto = modelMapper.map(userDetails, UserDto.class);
+            userDto.setRole(UserRole.ADMIN.toString());
 
-        UserDto createdUser = usersService.createUser(userDto);
+            UserDto createdUser = usersService.createUser(userDto);
 
-        CreateUserResponseModel returnValue = modelMapper.map(createdUser, CreateUserResponseModel.class);
+            CreateUserResponseModel returnValue = modelMapper.map(createdUser, CreateUserResponseModel.class);
 
-        return ResponseEntity.status(HttpStatus.CREATED).body(returnValue);
+            return ResponseEntity.status(HttpStatus.CREATED).body(returnValue);
+        }
+        return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
     }
 
     @GetMapping(value = "/{userId}", produces = {MediaType.APPLICATION_XML_VALUE, MediaType.APPLICATION_JSON_VALUE})
@@ -98,6 +106,21 @@ public class AdminController {
             produces = {MediaType.APPLICATION_XML_VALUE, MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<Boolean> isAdmin(@RequestHeader(value = "Authorization") String authHeader) {
         return ResponseEntity.status(HttpStatus.NO_CONTENT).body(usersService.isAdmin(authHeader));
+    }
+
+    @GetMapping(consumes = {MediaType.APPLICATION_XML_VALUE, MediaType.APPLICATION_JSON_VALUE},
+            produces = {MediaType.APPLICATION_XML_VALUE, MediaType.APPLICATION_JSON_VALUE})
+    public ResponseEntity<List<UserResponseModel>> getUsers(@RequestHeader("Authorization") String authHeader) {
+        if (!usersService.isAdmin(authHeader)) {
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        }
+
+        ModelMapper modelMapper = new ModelMapper();
+        modelMapper.getConfiguration().setMatchingStrategy(MatchingStrategies.STRICT);
+
+        List<UserDto> users = usersService.getUsers();
+        List<UserResponseModel> usersList = users.stream().map(p -> modelMapper.map(p, UserResponseModel.class)).toList();
+        return ResponseEntity.status(HttpStatus.OK).body(usersList);
     }
 
 

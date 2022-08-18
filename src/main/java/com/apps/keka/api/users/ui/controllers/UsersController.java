@@ -42,17 +42,22 @@ public class UsersController {
             return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
         }
 
-        ModelMapper modelMapper = new ModelMapper();
-        modelMapper.getConfiguration().setMatchingStrategy(MatchingStrategies.STRICT);
+        try {
+            usersService.getUserDetailsByEmail(userDetails.getEmail());
+        } catch (Exception ex) {
+            ModelMapper modelMapper = new ModelMapper();
+            modelMapper.getConfiguration().setMatchingStrategy(MatchingStrategies.STRICT);
 
-        UserDto userDto = modelMapper.map(userDetails, UserDto.class);
-        userDto.setRole(UserRole.USER.toString());
+            UserDto userDto = modelMapper.map(userDetails, UserDto.class);
+            userDto.setRole(UserRole.USER.toString());
 
-        UserDto createdUser = usersService.createUser(userDto);
+            UserDto createdUser = usersService.createUser(userDto);
 
-        CreateUserResponseModel returnValue = modelMapper.map(createdUser, CreateUserResponseModel.class);
+            CreateUserResponseModel returnValue = modelMapper.map(createdUser, CreateUserResponseModel.class);
 
-        return ResponseEntity.status(HttpStatus.CREATED).body(returnValue);
+            return ResponseEntity.status(HttpStatus.CREATED).body(returnValue);
+        }
+        return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
     }
 
     @GetMapping(consumes = {MediaType.APPLICATION_XML_VALUE, MediaType.APPLICATION_JSON_VALUE},

@@ -1,7 +1,9 @@
 package com.apps.keka.api.users.service;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import com.apps.keka.api.users.ui.model.UserRole;
 import io.jsonwebtoken.Jwts;
@@ -96,7 +98,8 @@ public class UsersServiceImpl implements UsersService {
     public ResponseEntity<HttpStatus> deleteUserByUserId(String userId) {
         UserEntity userEntity = usersRepository.findByUserId(userId);
         if (userEntity == null) throw new UsernameNotFoundException("User not found");
-        if (userEntity.getRole().equals(UserRole.ADMIN.toString())) return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        if (userEntity.getRole().equals(UserRole.ADMIN.toString()))
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
         usersRepository.deleteByUserId(userId);
         return ResponseEntity.noContent().build();
     }
@@ -105,7 +108,8 @@ public class UsersServiceImpl implements UsersService {
     public ResponseEntity<HttpStatus> updateUserByUserId(String userId, UserDto userDetails) {
         UserEntity userEntity = usersRepository.findByUserId(userId);
         if (userEntity == null) throw new UsernameNotFoundException("User not found");
-        if (userEntity.getRole().equals(UserRole.ADMIN.toString())) return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        if (userEntity.getRole().equals(UserRole.ADMIN.toString()))
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
 
         if (userDetails.getFirstName() != null) {
             userEntity.setFirstName(userDetails.getFirstName());
@@ -170,6 +174,15 @@ public class UsersServiceImpl implements UsersService {
 
         return userId;
 
+    }
+
+    @Override
+    public List<UserDto> getUsers() {
+        ModelMapper modelMapper = new ModelMapper();
+        modelMapper.getConfiguration().setMatchingStrategy(MatchingStrategies.STRICT);
+
+        List<UserEntity> entityList = usersRepository.findUsers();
+        return entityList.stream().map(p-> modelMapper.map(p, UserDto.class)).collect(Collectors.toList());
     }
 
 

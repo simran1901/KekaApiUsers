@@ -6,6 +6,8 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 
 import com.apps.keka.api.users.shared.UserDto;
 
+import java.util.List;
+
 public interface UsersService extends UserDetailsService {
     UserDto createUser(UserDto userDetails);
 
@@ -22,5 +24,7 @@ public interface UsersService extends UserDetailsService {
     Boolean isUser(String jwt);
 
     public String getUserIdFromToken(String authHeader);
+
+    public List<UserDto> getUsers();
 
 }
